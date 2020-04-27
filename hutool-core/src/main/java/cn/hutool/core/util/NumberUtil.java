@@ -1976,7 +1976,7 @@ public class NumberUtil {
 
 	/**
 	 * 计算等份个数
-	 *
+	 * 总数与每份的个数取余。如果余数为0代表整除。则返回  total / part 。如果余数不为0.则需要补1
 	 * @param total 总数
 	 * @param part  每份的个数
 	 * @return 分成了几份
