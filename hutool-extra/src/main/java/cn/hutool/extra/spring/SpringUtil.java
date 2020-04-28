@@ -19,12 +19,9 @@ public class SpringUtil implements ApplicationContextAware {
 
 	private static ApplicationContext applicationContext;
 
-	@SuppressWarnings("NullableProblems")
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
-		if (SpringUtil.applicationContext == null) {
-			SpringUtil.applicationContext = applicationContext;
-		}
+		SpringUtil.applicationContext = applicationContext;
 	}
 
 	/**
@@ -45,8 +42,8 @@ public class SpringUtil implements ApplicationContextAware {
 	 * @param name Bean名称
 	 * @return Bean
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T> T getBean(String name) {
-		//noinspection unchecked
 		return (T) applicationContext.getBean(name);
 	}
 

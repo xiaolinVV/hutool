@@ -12,11 +12,11 @@ import cn.hutool.core.io.resource.MultiResource;
 import cn.hutool.core.io.resource.Resource;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.URLUtil;
 import cn.hutool.http.cookie.GlobalCookieManager;
 import cn.hutool.http.ssl.SSLSocketFactoryBuilder;
 
@@ -96,7 +96,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 		GlobalCookieManager.setCookieManager(null);
 	}
 
-	private String url;
+	private UrlBuilder url;
 	private URLStreamHandler urlHandler;
 	private Method method = Method.GET;
 	/**
@@ -128,10 +128,6 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * 是否禁用缓存
 	 */
 	private boolean isDisableCache;
-	/**
-	 * 是否对url中的参数进行编码
-	 */
-	private boolean encodeUrlParams;
 	/**
 	 * 是否是REST请求模式
 	 */
@@ -168,8 +164,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * @param url URL
 	 */
 	public HttpRequest(String url) {
-		Assert.notBlank(url, "Param [url] can not be blank !");
-		this.url = URLUtil.normalize(url, true);
+		setUrl(url);
 		// 给定一个默认头信息
 		this.header(GlobalHeaders.INSTANCE.headers);
 	}
@@ -265,7 +260,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * @since 4.1.8
 	 */
 	public String getUrl() {
-		return url;
+		return url.toString();
 	}
 
 	/**
@@ -276,7 +271,19 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * @since 4.1.8
 	 */
 	public HttpRequest setUrl(String url) {
-		this.url = url;
+		this.url = UrlBuilder.ofHttp(url, this.charset);
+		return this;
+	}
+
+	/**
+	 * 设置URL
+	 *
+	 * @param urlBuilder url字符串
+	 * @return this
+	 * @since 5.3.1
+	 */
+	public HttpRequest setUrl(UrlBuilder urlBuilder) {
+		this.url = urlBuilder;
 		return this;
 	}
 
@@ -774,9 +781,10 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	 * @param isEncodeUrlParams 是否对URL中的参数进行编码
 	 * @return this
 	 * @since 4.4.1
+	 * @deprecated 编码自动完成，无需设置
 	 */
+	@Deprecated
 	public HttpRequest setEncodeUrlParams(boolean isEncodeUrlParams) {
-		this.encodeUrlParams = isEncodeUrlParams;
 		return this;
 	}
 
@@ -925,14 +933,8 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	public HttpResponse execute(boolean isAsync) {
 		// 初始化URL
 		urlWithParamIfGet();
-		// 编码URL
-		if (this.encodeUrlParams) {
-			this.url = HttpUtil.encodeParams(this.url, this.charset);
-		}
-
 		// 初始化 connection
 		initConnection();
-
 		// 发送请求
 		send();
 
@@ -957,10 +959,27 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 	public HttpRequest basicAuth(String username, String password) {
 		final String data = username.concat(":").concat(password);
 		final String base64 = Base64.encode(data, charset);
+		return auth("Basic " + base64);
+	}
 
-		header("Authorization", "Basic " + base64, true);
-
+	/**
+	 * 验证，简单插入Authorization头
+	 *
+	 * @param content 验证内容
+	 * @return HttpRequest
+	 * @since 5.2.4
+	 */
+	public HttpRequest auth(String content) {
+		header(Header.AUTHORIZATION, content, true);
 		return this;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = StrUtil.builder();
+		sb.append("Request Url: ").append(this.url).append(StrUtil.CRLF);
+		sb.append(super.toString());
+		return sb.toString();
 	}
 
 	// ---------------------------------------------------------------- Private method start
@@ -974,7 +993,8 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 			this.httpConnection.disconnectQuietly();
 		}
 
-		this.httpConnection = HttpConnection.create(URLUtil.toUrlForHttp(this.url, this.urlHandler), this.proxy)//
+		this.httpConnection = HttpConnection
+				.create(this.url.toURL(this.urlHandler), this.proxy)//
 				.setMethod(this.method)//
 				.setHttpsInfo(this.hostnameVerifier, this.ssf)//
 				.setConnectTimeout(this.connectionTimeout)//
@@ -1008,9 +1028,9 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 		if (Method.GET.equals(method) && false == this.isRest) {
 			// 优先使用body形式的参数，不存在使用form
 			if (ArrayUtil.isNotEmpty(this.bodyBytes)) {
-				this.url = HttpUtil.urlWithForm(this.url, StrUtil.str(this.bodyBytes, this.charset), this.charset, false);
+				this.url.getQuery().parse(StrUtil.str(this.bodyBytes, this.charset), this.charset);
 			} else {
-				this.url = HttpUtil.urlWithForm(this.url, this.form, this.charset, false);
+				this.url.getQuery().addAll(this.form);
 			}
 		}
 	}
@@ -1039,7 +1059,7 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 
 			if (responseCode != HttpURLConnection.HTTP_OK) {
 				if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP || responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_SEE_OTHER) {
-					this.url = httpConnection.header(Header.LOCATION);
+					setUrl(httpConnection.header(Header.LOCATION));
 					if (redirectCount < this.maxRedirectCount) {
 						redirectCount++;
 						return execute();
@@ -1089,12 +1109,23 @@ public class HttpRequest extends HttpBase<HttpRequest> {
 		}
 
 		// Write的时候会优先使用body中的内容，write时自动关闭OutputStream
-		if (ArrayUtil.isNotEmpty(this.bodyBytes)) {
-			IoUtil.write(this.httpConnection.getOutputStream(), true, this.bodyBytes);
-		} else {
-			final String content = HttpUtil.toParams(this.form, this.charset);
-			IoUtil.write(this.httpConnection.getOutputStream(), this.charset, true, content);
+		byte[] content;
+		if(ArrayUtil.isNotEmpty(this.bodyBytes)){
+			content = this.bodyBytes;
+		} else{
+			content = StrUtil.bytes(getFormUrlEncoded(), this.charset);
 		}
+		IoUtil.write(this.httpConnection.getOutputStream(), true, content);
+	}
+
+	/**
+	 * 获取编码后的表单数据，无表单数据返回""
+	 *
+	 * @return 编码后的表单数据，无表单数据返回""
+	 * @since 5.3.2
+	 */
+	private String getFormUrlEncoded() {
+		return HttpUtil.toParams(this.form, this.charset);
 	}
 
 	/**

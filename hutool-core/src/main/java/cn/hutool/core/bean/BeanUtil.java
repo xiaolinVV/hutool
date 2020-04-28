@@ -43,6 +43,23 @@ import java.util.Map;
 public class BeanUtil {
 
 	/**
+	 * 判断是否为可读的Bean对象，判定方法是：
+	 *
+	 * <pre>
+	 *     1、是否存在只有无参数的getXXX方法或者isXXX方法
+	 *     2、是否存在public类型的字段
+	 * </pre>
+	 *
+	 * @param clazz 待测试类
+	 * @return 是否为可读的Bean对象
+	 * @see #hasGetter(Class) 
+	 * @see #hasPublicField(Class)
+	 */
+	public static boolean isReadableBean(Class<?> clazz) {
+		return hasGetter(clazz) || hasPublicField(clazz);
+	}
+
+	/**
 	 * 判断是否为Bean对象，判定方法是：
 	 *
 	 * <pre>
@@ -53,6 +70,7 @@ public class BeanUtil {
 	 * @param clazz 待测试类
 	 * @return 是否为Bean对象
 	 * @see #hasSetter(Class)
+	 * @see #hasPublicField(Class)
 	 */
 	public static boolean isBean(Class<?> clazz) {
 		return hasSetter(clazz) || hasPublicField(clazz);
@@ -444,8 +462,22 @@ public class BeanUtil {
 	 * @since 4.1.20
 	 */
 	public static <T> T toBean(Object source, Class<T> clazz) {
+		return toBean(source, clazz, null);
+	}
+
+	/**
+	 * 对象或Map转Bean
+	 *
+	 * @param <T>     转换的Bean类型
+	 * @param source  Bean对象或Map
+	 * @param clazz   目标的Bean类型
+	 * @param options 属性拷贝选项
+	 * @return Bean对象
+	 * @since 5.2.4
+	 */
+	public static <T> T toBean(Object source, Class<T> clazz, CopyOptions options) {
 		final T target = ReflectUtil.newInstance(clazz);
-		copyProperties(source, target);
+		copyProperties(source, target, options);
 		return target;
 	}
 
@@ -574,6 +606,20 @@ public class BeanUtil {
 	// --------------------------------------------------------------------------------------------- copyProperties
 
 	/**
+	 * 创建对应的Class对象并复制Bean对象属性
+	 *
+	 * @param <T>    对象类型
+	 * @param source 源Bean对象
+	 * @param tClass 目标Class
+	 * @return 目标对象
+	 */
+	public static <T> T copyProperties(Object source, Class<T> tClass) {
+		T target = ReflectUtil.newInstance(tClass);
+		copyProperties(source, target, CopyOptions.create());
+		return target;
+	}
+
+	/**
 	 * 复制Bean对象属性
 	 *
 	 * @param source 源Bean对象
@@ -648,7 +694,7 @@ public class BeanUtil {
 	 */
 	public static <T> T trimStrFields(T bean, String... ignoreFields) {
 		if (bean == null) {
-			return bean;
+			return null;
 		}
 
 		final Field[] fields = ReflectUtil.getFields(bean.getClass());

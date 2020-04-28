@@ -23,7 +23,6 @@ import java.util.UUID;
  * Bean工具单元测试
  *
  * @author Looly
- *
  */
 public class BeanUtilTest {
 
@@ -42,10 +41,10 @@ public class BeanUtilTest {
 			@Override
 			public Object value(String key, Type valueType) {
 				switch (key) {
-				case "name":
-					return "张三";
-				case "age":
-					return 18;
+					case "name":
+						return "张三";
+					case "age":
+						return 18;
 				}
 				return null;
 			}
@@ -151,9 +150,20 @@ public class BeanUtilTest {
 		person.setOpenid("11213232");
 		person.setName("测试A11");
 		person.setSubName("sub名字");
+		person.setSlow(true);
 
 		Map<String, Object> map = BeanUtil.beanToMap(person);
 		Assert.assertEquals("sub名字", map.get("aliasSubName"));
+	}
+
+	@Test
+	public void mapToBeanWithAliasTest() {
+		Map<String, Object> map = MapUtil.newHashMap();
+		map.put("aliasSubName", "sub名字");
+		map.put("slow", true);
+
+		final SubPersonWithAlias subPersonWithAlias = BeanUtil.mapToBean(map, SubPersonWithAlias.class, false);
+		Assert.assertEquals("sub名字", subPersonWithAlias.getSubName());
 	}
 
 	@Test
@@ -200,6 +210,20 @@ public class BeanUtilTest {
 		Assert.assertTrue(set.contains("openid"));
 		Assert.assertTrue(set.contains("slow"));
 		Assert.assertTrue(set.contains("subName"));
+	}
+
+	@Test
+	public void copyProperties() {
+		SubPerson person = new SubPerson();
+		person.setAge(14);
+		person.setOpenid("11213232");
+		person.setName("测试A11");
+		person.setSubName("sub名字");
+		SubPerson person1 = BeanUtil.copyProperties(person, SubPerson.class);
+		Assert.assertEquals(14, person1.getAge());
+		Assert.assertEquals("11213232", person1.getOpenid());
+		Assert.assertEquals("测试A11", person1.getName());
+		Assert.assertEquals("sub名字", person1.getSubName());
 	}
 
 	@Test
@@ -286,9 +310,9 @@ public class BeanUtilTest {
 	@Getter
 	@Setter
 	public static class SubPersonWithAlias extends Person {
+		// boolean参数值非isXXX形式
 		@Alias("aliasSubName")
 		private String subName;
-		// boolean参数值非isXXX形式
 		private Boolean slow;
 	}
 
@@ -304,5 +328,25 @@ public class BeanUtilTest {
 		public String name;
 		public int age;
 		public String openid;
+	}
+
+	@Test
+	public void beanToBeanTest(){
+		// 修复对象无getter方法导致报错的问题
+		Page page1=new Page();
+		BeanUtil.toBean(page1, Page.class);
+	}
+
+	public static class Page {
+		private boolean optimizeCountSql = true;
+
+		public boolean optimizeCountSql() {
+			return optimizeCountSql;
+		}
+
+		public Page setOptimizeCountSql(boolean optimizeCountSql) {
+			this.optimizeCountSql = optimizeCountSql;
+			return this;
+		}
 	}
 }

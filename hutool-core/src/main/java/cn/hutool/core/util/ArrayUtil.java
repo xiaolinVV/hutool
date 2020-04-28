@@ -1,5 +1,6 @@
 package cn.hutool.core.util;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.IterUtil;
 import cn.hutool.core.exceptions.UtilException;
@@ -8,7 +9,14 @@ import cn.hutool.core.lang.Filter;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 数组工具类
@@ -931,7 +939,7 @@ public class ArrayUtil {
 		}
 
 		final int size = Math.min(keys.length, values.length);
-		final Map<K, V> map = CollectionUtil.newHashMap(size, isOrder);
+		final Map<K, V> map = CollUtil.newHashMap(size, isOrder);
 		for (int i = 0; i < size; i++) {
 			map.put(keys[i], values[i]);
 		}
@@ -2394,7 +2402,7 @@ public class ArrayUtil {
 			if (ArrayUtil.isArray(item)) {
 				sb.append(join(ArrayUtil.wrap(item), conjunction, prefix, suffix));
 			} else if (item instanceof Iterable<?>) {
-				sb.append(IterUtil.join((Iterable<?>) item, conjunction, prefix, suffix));
+				sb.append(CollUtil.join((Iterable<?>) item, conjunction, prefix, suffix));
 			} else if (item instanceof Iterator<?>) {
 				sb.append(IterUtil.join((Iterator<?>) item, conjunction, prefix, suffix));
 			} else {
@@ -2674,7 +2682,7 @@ public class ArrayUtil {
 	 * @since 3.0.9
 	 */
 	public static <T> T[] toArray(Iterator<T> iterator, Class<T> componentType) {
-		return toArray(CollectionUtil.newArrayList(iterator), componentType);
+		return toArray(CollUtil.newArrayList(iterator), componentType);
 	}
 
 	/**

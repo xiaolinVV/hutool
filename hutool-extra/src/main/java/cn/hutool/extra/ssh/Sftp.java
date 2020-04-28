@@ -238,7 +238,10 @@ public class Sftp extends AbstractFtp {
 				return LsEntrySelector.CONTINUE;
 			});
 		} catch (SftpException e) {
-			throw new JschRuntimeException(e);
+			if(false == StrUtil.startWithIgnoreCase(e.getMessage(), "No such file")){
+				throw new JschRuntimeException(e);
+			}
+			// 文件不存在忽略
 		}
 		return fileNames;
 	}
@@ -406,6 +409,15 @@ public class Sftp extends AbstractFtp {
 	public void close() {
 		JschUtil.close(this.channel);
 		JschUtil.close(this.session);
+	}
+
+	@Override
+	public String toString() {
+		return "Sftp{" +
+				"host='" + host + '\'' +
+				", port=" + port +
+				", user='" + user + '\'' +
+				'}';
 	}
 
 	/**

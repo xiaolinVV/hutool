@@ -2,6 +2,7 @@ package cn.hutool.core.lang;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.exceptions.ValidateException;
+import cn.hutool.core.util.CreditCodeUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReUtil;
@@ -123,7 +124,7 @@ public class Validator {
 		if (isFalse(value)) {
 			throw new ValidateException(errorMsgTemplate, params);
 		}
-		return value;
+		return true;
 	}
 
 	/**
@@ -140,7 +141,7 @@ public class Validator {
 		if (isTrue(value)) {
 			throw new ValidateException(errorMsgTemplate, params);
 		}
-		return value;
+		return false;
 	}
 
 	/**
@@ -178,7 +179,7 @@ public class Validator {
 		if (isNotNull(value)) {
 			throw new ValidateException(errorMsgTemplate, params);
 		}
-		return value;
+		return null;
 	}
 
 	/**
@@ -1102,5 +1103,23 @@ public class Validator {
 		if (false == isBetween(value, min, max)) {
 			throw new ValidateException(errorMsg);
 		}
+	}
+
+	/**
+	 * 是否是有效的统一社会信用代码
+	 * <pre>
+	 * 第一部分：登记管理部门代码1位 (数字或大写英文字母)
+	 * 第二部分：机构类别代码1位 (数字或大写英文字母)
+	 * 第三部分：登记管理机关行政区划码6位 (数字)
+	 * 第四部分：主体标识码（组织机构代码）9位 (数字或大写英文字母)
+	 * 第五部分：校验码1位 (数字或大写英文字母)
+	 * </pre>
+	 *
+	 * @param creditCode 统一社会信用代码
+	 * @return 校验结果
+	 * @since 5.2.4
+	 */
+	public static boolean isCreditCode(CharSequence creditCode) {
+		return CreditCodeUtil.isCreditCode(creditCode);
 	}
 }

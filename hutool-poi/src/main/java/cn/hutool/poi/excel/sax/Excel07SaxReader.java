@@ -42,10 +42,6 @@ public class Excel07SaxReader extends AbstractExcelSaxReader<Excel07SaxReader> i
 	 */
 	private static final String R_ATTR = "r";
 	/**
-	 * Cell类型
-	 */
-	private static final String T_ELEMENT = "t";
-	/**
 	 * SST（SharedStringsTable） 的索引，样式index
 	 */
 	private static final String S_ATTR_VALUE = "s";
@@ -61,7 +57,7 @@ public class Excel07SaxReader extends AbstractExcelSaxReader<Excel07SaxReader> i
 	// 当前列
 	private int curCell;
 	// 上一次的内容
-	private StringBuilder lastContent = new StringBuilder(64);
+	private final StringBuilder lastContent = new StringBuilder(64);
 	// 单元数据类型
 	private CellDataType cellDataType;
 	// 当前列坐标， 如A1，B5
