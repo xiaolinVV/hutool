@@ -567,7 +567,7 @@ public class FileUtil {
 	 * @return 最后修改时间
 	 */
 	public static Date lastModifiedTime(File file) {
-		if (!exist(file)) {
+		if (false == exist(file)) {
 			return null;
 		}
 
@@ -1149,6 +1149,29 @@ public class FileUtil {
 			// 复制后删除源
 			del(src);
 		}
+	}
+
+	/**
+	 * 修改文件或目录的文件名，不变更路径，只是简单修改文件名<br>
+	 * 重命名有两种模式：<br>
+	 * 1、isRetainExt为true时，保留原扩展名：
+	 *
+	 * <pre>
+	 * FileUtil.rename(file, "aaa", true) xx/xx.png =》xx/aaa.png
+	 * </pre>
+	 *
+	 * <pre>
+	 * FileUtil.rename(file, "aaa.jpg", false) xx/xx.png =》xx/aaa.jpg
+	 * </pre>
+	 *
+	 * @param file        被修改的文件
+	 * @param newName     新的文件名，包括扩展名
+	 * @param isOverride  是否覆盖目标文件
+	 * @return 目标文件
+	 * @since 5.3.6
+	 */
+	public static File rename(File file, String newName, boolean isOverride) {
+		return rename(file, newName, false, isOverride);
 	}
 
 	/**
@@ -3578,6 +3601,6 @@ public class FileUtil {
 	 * @param charset 编码
 	 */
 	public static void tail(File file, Charset charset) {
-		FileUtil.tail(file, charset, Tailer.CONSOLE_HANDLER);
+		tail(file, charset, Tailer.CONSOLE_HANDLER);
 	}
 }

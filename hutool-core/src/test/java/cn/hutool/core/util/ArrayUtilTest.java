@@ -6,7 +6,9 @@ import cn.hutool.core.lang.Filter;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
 
@@ -40,6 +42,11 @@ public class ArrayUtilTest {
 		isEmpty = ArrayUtil.isEmpty(d);
 		//noinspection ConstantConditions
 		Assert.assertTrue(isEmpty);
+
+		// Object数组
+		Object[] e = new Object[]{"1", "2", 3, 4D};
+		final boolean empty = ArrayUtil.isEmpty(e);
+		Assert.assertFalse(empty);
 	}
 
 	@Test
@@ -161,6 +168,17 @@ public class ArrayUtilTest {
 
 		double maxDouble = ArrayUtil.max(1D, 2.4D, 13.0D, 4.55D, 5D);
 		Assert.assertEquals(13.0, maxDouble, 2);
+
+		BigDecimal one = new BigDecimal("1.00");
+		BigDecimal two = new BigDecimal("2.0");
+		BigDecimal three = new BigDecimal("3");
+		BigDecimal[] bigDecimals = {two,one,three};
+
+		BigDecimal minAccuracy = ArrayUtil.min(bigDecimals, Comparator.comparingInt(BigDecimal::scale));
+		Assert.assertEquals(minAccuracy,three);
+
+		BigDecimal maxAccuracy = ArrayUtil.max(bigDecimals,Comparator.comparingInt(BigDecimal::scale));
+		Assert.assertEquals(maxAccuracy,one);
 	}
 
 	@Test
@@ -264,5 +282,11 @@ public class ArrayUtilTest {
 		Assert.assertEquals("B", array[1]);
 		Assert.assertEquals("C", array[2]);
 		Assert.assertEquals("D", array[3]);
+	}
+
+	@Test
+	public void addAllTest(){
+		final int[] ints = ArrayUtil.addAll(new int[]{1, 2, 3}, new int[]{4, 5, 6});
+		Assert.assertArrayEquals(new int[]{1,2,3,4,5,6}, ints);
 	}
 }

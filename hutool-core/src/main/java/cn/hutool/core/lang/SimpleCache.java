@@ -3,9 +3,10 @@ package cn.hutool.core.lang;
 import cn.hutool.core.lang.func.Func0;
 
 import java.io.Serializable;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.concurrent.locks.StampedLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * 简单缓存，无超时实现，默认使用{@link WeakHashMap}实现缓存自动清理
@@ -14,7 +15,7 @@ import java.util.concurrent.locks.StampedLock;
  * @param <V> 值类型
  * @author Looly
  */
-public class SimpleCache<K, V> implements Serializable {
+public class SimpleCache<K, V> implements Iterable<Map.Entry<K, V>>, Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -22,7 +23,7 @@ public class SimpleCache<K, V> implements Serializable {
 	 */
 	private final Map<K, V> cache;
 	// 乐观读写锁
-	private final StampedLock lock = new StampedLock();
+	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
 	/**
 	 * 构造，默认使用{@link WeakHashMap}实现缓存自动清理
@@ -52,11 +53,11 @@ public class SimpleCache<K, V> implements Serializable {
 	 * @return 值
 	 */
 	public V get(K key) {
-		long stamp = lock.readLock();
+		lock.readLock().lock();
 		try {
 			return cache.get(key);
 		} finally {
-			lock.unlockRead(stamp);
+			lock.readLock().unlock();
 		}
 	}
 
@@ -68,23 +69,11 @@ public class SimpleCache<K, V> implements Serializable {
 	 * @return 值对象
 	 */
 	public V get(K key, Func0<V> supplier) {
-		if (null == supplier) {
-			return get(key);
-		}
+		V v = get(key);
 
-		long stamp = lock.readLock();
-		V v;
-		try {
-			v = cache.get(key);
-			if (null == v) {
-				// 尝试转换独占写锁
-				long writeStamp = lock.tryConvertToWriteLock(stamp);
-				if (0 == writeStamp) {
-					// 转换失败，手动更新为写锁
-					lock.unlockRead(stamp);
-					writeStamp = lock.writeLock();
-				}
-				stamp = writeStamp;
+		if(null == v && null != supplier){
+			lock.writeLock().lock();
+			try{
 				v = cache.get(key);
 				// 双重检查，防止在竞争锁的过程中已经有其它线程写入
 				if (null == v) {
@@ -95,10 +84,11 @@ public class SimpleCache<K, V> implements Serializable {
 					}
 					cache.put(key, v);
 				}
+			} finally{
+				lock.writeLock().unlock();
 			}
-		} finally {
-			lock.unlock(stamp);
 		}
+
 		return v;
 	}
 
@@ -111,11 +101,11 @@ public class SimpleCache<K, V> implements Serializable {
 	 */
 	public V put(K key, V value) {
 		// 独占写锁
-		final long stamp = lock.writeLock();
+		lock.writeLock().lock();
 		try {
 			cache.put(key, value);
 		} finally {
-			lock.unlockWrite(stamp);
+			lock.writeLock().unlock();
 		}
 		return value;
 	}
@@ -128,11 +118,11 @@ public class SimpleCache<K, V> implements Serializable {
 	 */
 	public V remove(K key) {
 		// 独占写锁
-		final long stamp = lock.writeLock();
+		lock.writeLock().lock();
 		try {
 			return cache.remove(key);
 		} finally {
-			lock.unlockWrite(stamp);
+			lock.writeLock().unlock();
 		}
 	}
 
@@ -141,11 +131,16 @@ public class SimpleCache<K, V> implements Serializable {
 	 */
 	public void clear() {
 		// 独占写锁
-		final long stamp = lock.writeLock();
+		lock.writeLock().lock();
 		try {
 			this.cache.clear();
 		} finally {
-			lock.unlockWrite(stamp);
+			lock.writeLock().unlock();
 		}
+	}
+
+	@Override
+	public Iterator<Map.Entry<K, V>> iterator() {
+		return this.cache.entrySet().iterator();
 	}
 }

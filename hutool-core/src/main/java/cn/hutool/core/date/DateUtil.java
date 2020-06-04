@@ -8,6 +8,7 @@ import cn.hutool.core.date.format.DatePrinter;
 import cn.hutool.core.date.format.FastDateFormat;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.PatternPool;
+import cn.hutool.core.util.CharUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.Year;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -249,6 +251,17 @@ public class DateUtil extends CalendarUtil {
 	 */
 	public static int dayOfMonth(Date date) {
 		return DateTime.of(date).dayOfMonth();
+	}
+
+	/**
+	 * 获得指定日期是这个日期所在年的第几天
+	 *
+	 * @param date 日期
+	 * @return 天
+	 * @since 5.3.6
+	 */
+	public static int dayOfYear(Date date) {
+		return DateTime.of(date).dayOfYear();
 	}
 
 	/**
@@ -714,7 +727,14 @@ public class DateUtil extends CalendarUtil {
 	}
 
 	/**
-	 * 格式yyyy-MM-dd HH:mm:ss
+	 * 解析日期时间字符串，格式支持：
+	 *
+	 * <pre>
+	 * yyyy-MM-dd HH:mm:ss
+	 * yyyy/MM/dd HH:mm:ss
+	 * yyyy.MM.dd HH:mm:ss
+	 * yyyy年MM月dd日 HH:mm:ss
+	 * </pre>
 	 *
 	 * @param dateString 标准形式的时间字符串
 	 * @return 日期对象
@@ -725,7 +745,13 @@ public class DateUtil extends CalendarUtil {
 	}
 
 	/**
-	 * 解析格式为yyyy-MM-dd的日期，忽略时分秒
+	 * 解析日期字符串，忽略时分秒，支持的格式包括：
+	 * <pre>
+	 * yyyy-MM-dd
+	 * yyyy/MM/dd
+	 * yyyy.MM.dd
+	 * yyyy年MM月dd日
+	 * </pre>
 	 *
 	 * @param dateString 标准形式的日期字符串
 	 * @return 日期对象
@@ -883,17 +909,27 @@ public class DateUtil extends CalendarUtil {
 			return parseUTC(dateStr);
 		}
 
-		if (length == DatePattern.NORM_DATETIME_PATTERN.length()) {
-			// yyyy-MM-dd HH:mm:ss
-			return parseDateTime(dateStr);
-		} else if (length == DatePattern.NORM_DATE_PATTERN.length()) {
-			// yyyy-MM-dd
-			return parseDate(dateStr);
-		} else if (length == DatePattern.NORM_DATETIME_MINUTE_PATTERN.length()) {
-			// yyyy-MM-dd HH:mm
-			return parse(normalize(dateStr), DatePattern.NORM_DATETIME_MINUTE_FORMAT);
-		} else if (length >= DatePattern.NORM_DATETIME_MS_PATTERN.length() - 2) {
-			return parse(normalize(dateStr), DatePattern.NORM_DATETIME_MS_FORMAT);
+		//标准日期格式（包括单个数字的日期时间）
+		dateStr = normalize(dateStr);
+		if (ReUtil.isMatch(DatePattern.REGEX_NORM, dateStr)) {
+			final int colonCount = StrUtil.count(dateStr, CharUtil.COLON);
+			switch (colonCount) {
+				case 0:
+					// yyyy-MM-dd
+					return parse(dateStr, DatePattern.NORM_DATE_FORMAT);
+				case 1:
+					// yyyy-MM-dd HH:mm
+					return parse(dateStr, DatePattern.NORM_DATETIME_MINUTE_FORMAT);
+				case 2:
+					// yyyy-MM-dd HH:mm:ss
+					return parse(dateStr, DatePattern.NORM_DATETIME_FORMAT);
+			}
+		}
+
+		// 长度判断
+		if (length >= DatePattern.NORM_DATETIME_MS_PATTERN.length() - 2) {
+			//yyyy-MM-dd HH:mm:ss.SSS
+			return parse(dateStr, DatePattern.NORM_DATETIME_MS_FORMAT);
 		}
 
 		// 没有更多匹配的时间格式
@@ -1837,6 +1873,17 @@ public class DateUtil extends CalendarUtil {
 	public static LocalDateTime toLocalDateTime(Date date) {
 		final DateTime dateTime = date(date);
 		return LocalDateTime.ofInstant(dateTime.toInstant(), dateTime.getZoneId());
+	}
+
+	/**
+	 * 获得指定年份的总天数
+	 *
+	 * @param year 年份
+	 * @return 天
+	 * @since 5.3.6
+	 */
+	public static int lengthOfYear(int year) {
+		return Year.of(year).length();
 	}
 
 	// ------------------------------------------------------------------------ Private method start
