@@ -779,5 +779,16 @@ public class DateUtilTest {
 		Assert.assertEquals("2020-05-08 03:02:03", dateTime.toString());
 		dateTime = DateUtil.parse("2020-5-8 3:12:13");
 		Assert.assertEquals("2020-05-08 03:12:13", dateTime.toString());
+
+		dateTime = DateUtil.parse("2020-5-8 4:12:26.223");
+		Assert.assertEquals("2020-05-08 04:12:26", dateTime.toString());
+	}
+
+	@SuppressWarnings("ConstantConditions")
+	@Test
+	public void parseISO8601Test(){
+		String dt = "2020-06-03 12:32:12,333";
+		final DateTime parse = DateUtil.parse(dt);
+		Assert.assertEquals("2020-06-03 12:32:12", parse.toString());
 	}
 }

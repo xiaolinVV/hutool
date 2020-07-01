@@ -3,6 +3,30 @@
 
 -------------------------------------------------------------------------------------------------------------
 
+## 5.3.8 (2020-06-16)
+
+### 新特性
+* 【core   】     增加ISO8601日期格式（issue#904@Github）
+* 【setting】     Props异常规则修改（issue#907@Github）
+* 【setting】     增加GIF支持
+* 【core   】     复制创建一个Bean对象, 并忽略某些属性(pr#130@Gitee)
+* 【core   】     DateUtil.parse支持更多日期格式(issue#I1KHTB@Gitee)
+* 【crypto 】     增加获取密钥空指针的检查(issue#925@Github)
+* 【core   】     增加StrUtil.removeAny方法(issue#923@Github)
+* 【db     】     增加部分Connection参数支持(issue#924@Github)
+* 【core   】     FileUtil增加别名方法(pr#926@Github)
+* 【poi    】     EcelReader中增加read重载，提供每个单元格单独处理的方法(issue#I1JZTL@Gitee)
+
+### Bug修复
+* 【json   】     修复append方法导致的JSONConfig传递失效问题（issue#906@Github）
+* 【core   】     修复CollUtil.subtractToList判断错误（pr#915@Github）
+* 【poi    】     修复WordWriter写表格问题（pr#914@Github）
+* 【core   】     修复IoUtil.readBytes缓存数组长度问题（issue#I1KIUE@Gitee）
+* 【core   】     修复BigExcelWriter多次flush导致的问题（issue#920@Github）
+* 【extra  】     绕过Pinyin4j最后一个分隔符失效的bug（issue#921@Github）
+
+-------------------------------------------------------------------------------------------------------------
+
 ## 5.3.7 (2020-06-03)
 
 ### 新特性
