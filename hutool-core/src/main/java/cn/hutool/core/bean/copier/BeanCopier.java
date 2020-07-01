@@ -245,6 +245,7 @@ public class BeanCopier<T> implements Copier<T>, Serializable {
 				continue;
 			}
 
+			// TODO: 2020/6/15 这块的类型查找还没看懂哦  @zhangshaolin
 			Type valueType = (null == setterMethod) ? TypeUtil.getType(field) : TypeUtil.getFirstParamType(setterMethod);
 			if (valueType instanceof ParameterizedType) {
 				// 参数为泛型参数类型，解析对应泛型类型为真实类型
@@ -272,6 +273,7 @@ public class BeanCopier<T> implements Copier<T>, Serializable {
 			}
 
 			try {
+				// TODO: 2020/6/15 思考这一步还有没有必要再做一次转换呢？ @zhangshaolin
 				// valueProvider在没有对值做转换且当类型不匹配的时候，执行默认转换
 				propClass = prop.getFieldClass();
 				if (false ==propClass.isInstance(value)) {

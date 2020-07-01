@@ -110,6 +110,7 @@ public class CollUtil {
 		} else {
 			final Map<T, Integer> map1 = countMap(coll1);
 			final Map<T, Integer> map2 = countMap(coll2);
+			// TODO: 2020/6/18 这里核心是把两个列表放到一个新的 set 集合，达到去重的目的，另外先放入哪个 list 也是有先后顺序的 @zhangshaolin
 			final Set<T> elts = newHashSet(coll2);
 			elts.addAll(coll1);
 			int m;

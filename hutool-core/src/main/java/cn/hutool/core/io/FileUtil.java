@@ -51,14 +51,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 import java.util.zip.CRC32;
@@ -546,6 +539,7 @@ public class FileUtil {
 			return false;
 		}
 
+		// TODO: 2020/6/23 这里需要判断是目录吗？ @zhangshaolin
 		final String[] fileList = file.list();
 		if (fileList == null) {
 			return false;
@@ -787,7 +781,7 @@ public class FileUtil {
 		if (Files.notExists(path)) {
 			return true;
 		}
-
+		// TODO: 2020/6/23 暂时看不懂 @zhangshaolin
 		try {
 			if (Files.isDirectory(path)) {
 				Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
@@ -958,6 +952,7 @@ public class FileUtil {
 	 * @throws IORuntimeException IO异常
 	 */
 	public static File createTempFile(String prefix, String suffix, File dir, boolean isReCreat) throws IORuntimeException {
+		// TODO: 2020/6/23 为什么要重试 50 次呢？ @zhangshaolin
 		int exceptionsCount = 0;
 		while (true) {
 			try {
@@ -987,6 +982,7 @@ public class FileUtil {
 	 * @throws IORuntimeException IO异常
 	 */
 	public static File copyFile(String src, String dest, StandardCopyOption... options) throws IORuntimeException {
+		// TODO: 2020/6/25 校验有问题 @zhangshaolin
 		Assert.notBlank(src, "Source File path is blank !");
 		Assert.notNull(src, "Destination File path is null !");
 		return copyFile(Paths.get(src), Paths.get(dest), options).toFile();

@@ -1,5 +1,7 @@
 package cn.hutool.core.io;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.file.LineSeparator;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.CharsetUtil;
@@ -10,7 +12,10 @@ import org.junit.Test;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * {@link FileUtil} 单元测试类
@@ -370,5 +375,14 @@ public class FileUtilTest {
 	public void getMimeTypeTest() {
 		String mimeType = FileUtil.getMimeType("test2Write.jpg");
 		Assert.assertEquals("image/jpeg", mimeType);
+	}
+
+	@Test
+	public void testA() {
+		List<String> list = CollUtil.newArrayList("3.aaa", "2.bbb", "1.ccc")
+				.stream()
+				.sorted(Comparator.comparingInt(o -> Convert.toInt(o.split("\\.")[0])))
+				.collect(Collectors.toList());
+		Console.log(list);
 	}
 }

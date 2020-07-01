@@ -780,4 +780,12 @@ public class DateUtilTest {
 		dateTime = DateUtil.parse("2020-5-8 3:12:13");
 		Assert.assertEquals("2020-05-08 03:12:13", dateTime.toString());
 	}
+
+	@Test
+	public void dateTest1() {
+		String startDateStr = DateUtil.beginOfDay(DateUtil.date(1593421893824L)).toString();
+
+		String endDateStr = DateUtil.endOfDay(DateUtil.date(1593508293824L)).toString();
+		System.out.println(startDateStr + "||" + endDateStr);
+	}
 }
