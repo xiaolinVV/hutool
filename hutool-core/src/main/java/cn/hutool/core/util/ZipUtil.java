@@ -229,6 +229,7 @@ public class ZipUtil {
 				zip(srcFile, srcRootDir, zipOutputStream, filter);
 				zipOutputStream.flush();
 			}
+			zipOutputStream.finish();
 		} catch (IOException e) {
 			throw new IORuntimeException(e);
 		}

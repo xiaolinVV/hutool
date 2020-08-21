@@ -178,7 +178,7 @@ public class Dict extends LinkedHashMap<String, Object> implements BasicTypeGett
 	 * @return vo
 	 */
 	public <T> T toBean(Class<T> clazz) {
-		return BeanUtil.mapToBean(this, clazz, false);
+		return BeanUtil.toBean(this, clazz);
 	}
 
 	/**
@@ -189,7 +189,7 @@ public class Dict extends LinkedHashMap<String, Object> implements BasicTypeGett
 	 * @return vo
 	 */
 	public <T> T toBeanIgnoreCase(Class<T> clazz) {
-		return BeanUtil.mapToBeanIgnoreCase(this, clazz, false);
+		return BeanUtil.toBeanIgnoreCase(this, clazz, false);
 	}
 
 	/**
@@ -461,6 +461,11 @@ public class Dict extends LinkedHashMap<String, Object> implements BasicTypeGett
 	@Override
 	public Object put(String key, Object value) {
 		return super.put(customKey(key), value);
+	}
+
+	@Override
+	public void putAll(Map<? extends String, ?> m) {
+		m.forEach(this::put);
 	}
 
 	@Override
