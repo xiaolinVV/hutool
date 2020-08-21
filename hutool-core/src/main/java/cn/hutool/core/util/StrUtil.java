@@ -3,6 +3,7 @@ package cn.hutool.core.util;
 import cn.hutool.core.comparator.VersionComparator;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.lang.Filter;
 import cn.hutool.core.lang.Matcher;
 import cn.hutool.core.lang.func.Func1;
 import cn.hutool.core.text.StrBuilder;
@@ -481,7 +482,7 @@ public class StrUtil {
 	}
 
 	/**
-	 * 除去字符串头尾部的空白，如果字符串是{@code null}，返回<code>""</code>。
+	 * 除去字符串头尾部的空白，如果字符串是{@code null}或者""，返回{@code null}。
 	 *
 	 * <pre>
 	 * StrUtil.trimToNull(null)          = null
@@ -969,7 +970,7 @@ public class StrUtil {
 	 * 移除字符串中所有给定字符串，当某个字符串出现多次，则全部移除<br>
 	 * 例：removeAny("aa-bb-cc-dd", "a", "b") =》 --cc-dd
 	 *
-	 * @param str         字符串
+	 * @param str          字符串
 	 * @param strsToRemove 被移除的字符串
 	 * @return 移除后的字符串
 	 * @since 5.3.8
@@ -978,7 +979,7 @@ public class StrUtil {
 		String result = str(str);
 		if (isNotEmpty(str)) {
 			for (CharSequence strToRemove : strsToRemove) {
-				result = removeAll(str, strToRemove);
+				result = removeAll(result, strToRemove);
 			}
 		}
 		return result;
@@ -1332,20 +1333,7 @@ public class StrUtil {
 	 * @return 清理后的字符串
 	 */
 	public static String cleanBlank(CharSequence str) {
-		if (str == null) {
-			return null;
-		}
-
-		int len = str.length();
-		final StringBuilder sb = new StringBuilder(len);
-		char c;
-		for (int i = 0; i < len; i++) {
-			c = str.charAt(i);
-			if (false == CharUtil.isBlankChar(c)) {
-				sb.append(c);
-			}
-		}
-		return sb.toString();
+		return filter(str, c -> false == CharUtil.isBlankChar(c));
 	}
 
 	// ------------------------------------------------------------------------------ Split
@@ -1840,7 +1828,7 @@ public class StrUtil {
 	 */
 	public static String subBefore(CharSequence string, char separator, boolean isLastSeparator) {
 		if (isEmpty(string)) {
-			return null == string ? null : string.toString();
+			return null == string ? null : EMPTY;
 		}
 
 		final String str = string.toString();
@@ -1878,7 +1866,7 @@ public class StrUtil {
 	 */
 	public static String subAfter(CharSequence string, CharSequence separator, boolean isLastSeparator) {
 		if (isEmpty(string)) {
-			return null == string ? null : string.toString();
+			return null == string ? null : EMPTY;
 		}
 		if (separator == null) {
 			return EMPTY;
@@ -1914,7 +1902,7 @@ public class StrUtil {
 	 */
 	public static String subAfter(CharSequence string, char separator, boolean isLastSeparator) {
 		if (isEmpty(string)) {
-			return null == string ? null : string.toString();
+			return null == string ? null : EMPTY;
 		}
 		final String str = string.toString();
 		final int pos = isLastSeparator ? str.lastIndexOf(separator) : str.indexOf(separator);
@@ -2419,7 +2407,11 @@ public class StrUtil {
 
 	/**
 	 * 将对象转为字符串<br>
-	 * 1、Byte数组和ByteBuffer会被转换为对应字符串的数组 2、对象数组会调用Arrays.toString方法
+	 *
+	 * <pre>
+	 * 1、Byte数组和ByteBuffer会被转换为对应字符串的数组
+	 * 2、对象数组会调用Arrays.toString方法
+	 * </pre>
 	 *
 	 * @param obj 对象
 	 * @return 字符串
@@ -3312,11 +3304,11 @@ public class StrUtil {
 		if (null == str) {
 			return null;
 		}
-		if ((str.length() + 3) <= maxLength) {
+		if (str.length() <= maxLength) {
 			return str.toString();
 		}
 		int w = maxLength / 2;
-		int l = str.length();
+		int l = str.length() + 3;
 
 		final String str2 = str.toString();
 		return format("{}...{}", str2.substring(0, maxLength - w), str2.substring(l - w));
@@ -4319,5 +4311,30 @@ public class StrUtil {
 			}
 		}
 		return new String(buffer);
+	}
+
+	/**
+	 * 过滤字符串
+	 *
+	 * @param str    字符串
+	 * @param filter 过滤器
+	 * @return 过滤后的字符串
+	 * @since 5.4.0
+	 */
+	public static String filter(CharSequence str, final Filter<Character> filter) {
+		if (str == null || filter == null) {
+			return str(str);
+		}
+
+		int len = str.length();
+		final StringBuilder sb = new StringBuilder(len);
+		char c;
+		for (int i = 0; i < len; i++) {
+			c = str.charAt(i);
+			if (filter.accept(c)) {
+				sb.append(c);
+			}
+		}
+		return sb.toString();
 	}
 }

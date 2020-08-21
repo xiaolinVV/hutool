@@ -294,7 +294,7 @@ public class Ftp extends AbstractFtp {
 			return ListUtil.empty();
 		}
 
-		final List<FTPFile> result = new ArrayList<>(ftpFiles.length - 2);
+		final List<FTPFile> result = new ArrayList<>(ftpFiles.length - 2 <= 0 ? ftpFiles.length : ftpFiles.length - 2);
 		String fileName;
 		for (FTPFile ftpFile : ftpFiles) {
 			fileName = ftpFile.getName();

@@ -3,6 +3,100 @@
 
 -------------------------------------------------------------------------------------------------------------
 
+# 5.4.0 (2020-08-06)
+
+### 新特性
+* 【socket】     对NioServer和NioClient改造（pr#992@Github）
+* 【core  】     StrUtil增加filter方法（pr#149@Gitee）
+* 【core  】     DateUtil增加beginOfWeek重载
+* 【core  】     将有歧义的BeanUtil.mapToBean方法置为过期（使用toBean方法）
+* 【core  】     添加WatchAction（对Watcher的抽象）
+* 【core  】     修改UUID正则，更加严谨（issue#I1Q1IW@Gitee）
+* 【core  】     ArrayUtil增加isAllNull方法（issue#1004@Github）
+* 【core  】     CollUtil增加contains方法（pr#152@Gitee）
+* 【core  】     ArrayUtil增加isAllNotNull方法（pr#1008@Github）
+* 【poi   】     closeAfterRead参数无效，方法设为过期（issue#1007@Github）
+* 【core  】     CollUtil中部分方法返回null变更为返回empty
+* 【all   】     添加英文README（pr#153@Gitee）
+* 【extra 】     SpringUtil增加getBean(TypeReference)（pr#1009@Github）
+* 【core  】     Assert增加方法，支持自定义异常处理（pr#154@Gitee）
+* 【core  】     BooleanConverter增加数字转换规则（issue#I1R2AB@Gitee）
+* 【poi   】     sax方式读取增加一个sheet结束的回调（issue#155@Gitee）
+* 【db    】     增加BeeCP连接池支持
+* 【core  】     改进Img.pressImage方法，避免变色问题（issue#1001@Github）
+
+### Bug修复#
+* 【core  】     修复原始类型转换时，转换失败没有抛出异常的问题
+* 【core  】     修复BeanUtil.mapToBean中bean的class非空构造无法实例化问题
+* 【core  】     修复NamedSql多个连续变量出现替换问题
+* 【core  】     修复Bean重名字段（大小写区别）获取数据出错的问题（issue#I1QBQ4@Gitee）
+* 【http  】     修复SimpleServer响应头无效问题（issue#1006@Github）
+* 【core  】     修复ThreadLocalRandom共享seed导致获取随机数一样的问题（pr#151@Gitee）
+
+-------------------------------------------------------------------------------------------------------------
+
+# 5.3.11 (2020-08-01)
+
+### 新特性
+* 【captcha】     AbstractCaptcha增加getImageBase64Data方法（pr#985@Github）
+* 【core   】     增加PhoneUtil（pr#990@Github）
+* 【core   】     改进Img，目标图片类型未定义使用源图片类型（issue#I1PB0B@Gitee）
+* 【json   】     JSONConfig增加Transient选项（issue#I1PLHN@Gitee）
+* 【core   】     MapUtil增加getXXX的默认值重载（issue#I1PTGI@Gitee）
+* 【core   】     CalendarUtil增加parseByPatterns方法（issue#993@Github）
+
+### Bug修复#
+
+-------------------------------------------------------------------------------------------------------------
+
+## 5.3.10 (2020-07-23)
+
+### 新特性
+* 【db   】       增加DbUtil.setReturnGeneratedKeyGlobal（issue#I1NM0K@Gitee）
+* 【core 】       增加DataSize和DataSizeUtil（issue#967@Github）
+* 【core 】       ImgUtil增加异常，避免空指针（issue#I1NKXG@Gitee）
+* 【core 】       增加CRC16算法若干（pr#963@Github）
+* 【core 】       LocalDateTimeUtil增加format等方法（pr#140@Gitee）
+* 【http 】       UserAgentUtil增加Android原生浏览器识别（pr#975@Github）
+* 【crypto 】     增加ECIES算法类（issue#979@Github）
+* 【crypto 】     CollUtil增加padLeft和padRight方法（pr#141@Gitee）
+* 【core 】       IdCardUtil香港身份证去除首字母校验（issue#I1OOTB@Gitee）
+
+### Bug修复
+* 【core   】     修复ZipUtil中finish位于循环内的问题（issue#961@Github）
+* 【core   】     修复CollUtil.page未越界检查的问题（issue#I1O2LR@Gitee）
+* 【core   】     修复StrUtil.removeAny的bug（issue#977@Github）
+
+-------------------------------------------------------------------------------------------------------------
+
+## 5.3.9 (2020-07-12)
+
+### 新特性
+* 【core   】     DateUtil增加formatChineseDate（pr#932@Github）
+* 【core   】     ArrayUtil.isEmpty修改逻辑（pr#948@Github）
+* 【core   】     增强StrUtil中空判断后返回数据性能（pr#949@Github）
+* 【core   】     deprecate掉millsecond，改为millisecond（issue#I1M9P8@Gitee）
+* 【core   】     增加LocalDateTimeUtil（issue#I1KUVC@Gitee）
+* 【core   】     Month增加getLastDay方法
+* 【core   】     ChineseDate支持到2099年
+
+### Bug修复
+* 【core   】     修复NumberUtil.partValue有余数问题（issue#I1KX66@Gitee）
+* 【core   】     修复BeanUtil.isEmpty不能忽略static字段问题（issue#I1KZI6@Gitee）
+* 【core   】     修复StrUtil.brief长度问题（pr#930@Github）
+* 【socket 】     修复AioSession构造超时无效问题（pr#941@Github）
+* 【setting】     修复GroupSet.contains错误（pr#943@Github）
+* 【core   】     修复ZipUtil没有调用finish问题（issue#944@Github）
+* 【extra  】     修复Ftp中ArrayList长度为负问题（pr#136@Github）
+* 【core   】     修复Dict中putAll大小写问题（issue#I1MU5B@Gitee）
+* 【core   】     修复POI中sax读取数字判断错误问题（issue#931@Github）
+* 【core   】     修复DateUtil.endOfQuarter错误问题（issue#I1NGZ7@Gitee）
+* 【core   】     修复URL中有空格转为+问题（issue#I1NGW4@Gitee）
+* 【core   】     修复CollUtil.intersectionDistinct空集合结果错误问题
+* 【core   】     修复ChineseDate在1996年计算错误问题（issue#I1N96I@Gitee）
+
+-------------------------------------------------------------------------------------------------------------
+
 ## 5.3.8 (2020-06-16)
 
 ### 新特性

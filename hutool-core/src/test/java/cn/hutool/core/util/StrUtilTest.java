@@ -21,12 +21,6 @@ public class StrUtilTest {
 	}
 	
 	@Test
-	public void isBlankTest2() {
-		String blank = "\u202a";
-		Assert.assertTrue(StrUtil.isBlank(blank));
-	}
-
-	@Test
 	public void trimTest() {
 		String blank = "	 哈哈 　";
 		String trim = StrUtil.trim(blank);
@@ -448,5 +442,20 @@ public class StrUtilTest {
 		String[] results2 = StrUtil.subBetweenAll(src2,"/*","*/");
 		Assert.assertEquals(0, results2.length);
 	}
-	
+
+	@Test
+	public void briefTest(){
+		String str = RandomUtil.randomString(1000);
+		int maxLength = RandomUtil.randomInt(1000);
+		String brief = StrUtil.brief(str, maxLength);
+		Assert.assertEquals(brief.length(), maxLength);
+	}
+
+	@Test
+	public void filterTest() {
+		final String filterNumber = StrUtil.filter("hutool678", CharUtil::isNumber);
+		Assert.assertEquals("678", filterNumber);
+		String cleanBlank = StrUtil.filter("	 你 好　", c -> !CharUtil.isBlankChar(c));
+		Assert.assertEquals("你好", cleanBlank);
+	}
 }

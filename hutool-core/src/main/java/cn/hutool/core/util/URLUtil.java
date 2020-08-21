@@ -14,7 +14,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
@@ -331,11 +330,8 @@ public class URLUtil {
 		if (null == charset) {
 			return url;
 		}
-		try {
-			return java.net.URLEncoder.encode(url, charset.toString());
-		} catch (UnsupportedEncodingException e) {
-			throw new UtilException(e);
-		}
+
+		return URLEncoder.ALL.encode(url, charset);
 	}
 
 	/**
@@ -774,6 +770,25 @@ public class URLUtil {
 				((HttpURLConnection) conn).disconnect();
 			}
 		}
+	}
+
+	/**
+	 * Data URI Scheme封装，数据格式为Base64。data URI scheme 允许我们使用内联（inline-code）的方式在网页中包含数据，<br>
+	 * 目的是将一些小的数据，直接嵌入到网页中，从而不用再从外部文件载入。常用于将图片嵌入网页。
+	 *
+	 * <p>
+	 * Data URI的格式规范：
+	 * <pre>
+	 *     data:[&lt;mime type&gt;][;charset=&lt;charset&gt;][;&lt;encoding&gt;],&lt;encoded data&gt;
+	 * </pre>
+	 *
+	 * @param mimeType 可选项（null表示无），数据类型（image/png、text/plain等）
+	 * @param data     编码后的数据
+	 * @return Data URI字符串
+	 * @since 5.3.11
+	 */
+	public static String getDataUriBase64(String mimeType, String data) {
+		return getDataUri(mimeType, null, "BASE64", data);
 	}
 
 	/**
